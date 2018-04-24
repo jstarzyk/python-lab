@@ -40,6 +40,8 @@ def validate(expr):
             if expr[i] == '(':
                 parens += 1
                 i += 1
+            elif expr[i] == '~':
+                i += 1
             else:
                 var, i = consume(expr, i)
                 if is_variable(var):
