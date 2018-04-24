@@ -1,5 +1,6 @@
 import unittest
 from exp_simplifier.validate import validate
+# import re
 
 
 class TestValidity(unittest.TestCase):
@@ -12,6 +13,10 @@ class TestValidity(unittest.TestCase):
         self.assertEqual(validate('a | 1 & >'), False)
         self.assertEqual(validate('~a | 1 & b ^ ~c'), True)
         self.assertEqual(validate('~a | 1 & b ^ (~c)'), True)
+        self.assertEqual(validate('~a|1&b^(~c)'), True)
+
+    # def test_tmp(self):
+    #     self.assertEqual(re.findall('[\d\w]+', '~a|1&b\^(~c)'), ['a', '1', 'b', 'c'])
 
 
 if __name__ == '__main__':
