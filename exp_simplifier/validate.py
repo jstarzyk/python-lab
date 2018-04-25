@@ -133,7 +133,7 @@ def get_min_terms(_template, _variables):
         values = [d == 1 for d in bins]
         _globals = {'_xor': _xor, '_imp': _imp, '_equ': _equ}
         if eval(_template, _globals, dict(zip(_variables, values))):
-            min_terms.append(([m], bins))
+            min_terms.append(((m,), tuple(bins)))
 
     return min_terms
 
@@ -155,24 +155,27 @@ def diff_by_one(bits1, bits2):
             if diffs > 1:
                 return None
 
-    return res
+    return tuple(res)
 
 
 def create_groups(min_terms):
-    groups = {}
+    groups = dict()
 
     for mt in min_terms:
         # n = len(list(filter(lambda x: x is True, mt[1])))
         n = len(list(filter(lambda x: x == 1, mt[1])))
-        groups.setdefault(n, [])
-        groups[n].append(mt)
+        groups.setdefault(n, set())
+        groups[n].add(mt)
+
+    # for l in groups:
+    #     groups[l] = set(groups[l])
 
     return collections.OrderedDict(sorted(groups.items(), key=lambda i: i[0]))
 
 
 def merge_groups(g1, g2):
     # g1 = [([2], [0,0,1,0]), ([8], [1,0,0,0])]
-    result = []
+    result = set()
 
     for mt1 in g1:
         bits1 = mt1[1]
@@ -180,7 +183,7 @@ def merge_groups(g1, g2):
             bits2 = mt2[1]
             bits = diff_by_one(bits1, bits2)
             if bits:
-                result.append((sorted(mt1[0] + mt2[0]), bits))
+                result.add((tuple(sorted(mt1[0] + mt2[0])), bits))
 
     return result
 
