@@ -19,17 +19,17 @@ class Infix(object):
 
 
 @Infix
-def xor(a, b):
+def _xor(a, b):
     return (a and not b) or (not a and b)
 
 
 @Infix
-def imp(a, b):
+def _imp(a, b):
     return not a and b
 
 
 @Infix
-def equ(a, b):
+def _equ(a, b):
     return (a and b) or (not a and not b)
 
 
@@ -49,7 +49,7 @@ def is_variable(var):
     return True
 
 
-def consume(expr, i):
+def consume_variable(expr, i):
     for j in range(i + 1, i + len(expr[i:])):
         if not expr[j].isalpha():
             return expr[i:j], j
@@ -59,11 +59,8 @@ def consume(expr, i):
 def validate(expr):
     state = State.S1
     parens = 0
-    # variables = []
     template = ''
-    len_template = 0
-    elems = []
-    indexes = {}
+    variables = set()
 
     i = 0
     while i < len(expr):
@@ -81,25 +78,18 @@ def validate(expr):
                 template += 'not '
                 i += 1
             else:
-                var, i = consume(expr, i)
+                var, i = consume_variable(expr, i)
                 if is_variable(var):
                     state = State.S2
-
-                    if template != '':
-                        elems.append(template)
-                        template = ''
-                        len_template += 1
-
-                    elems.append(var)
-
-                    if var in indexes:
-                        indexes[var].append(len_template)
+                    if var == '1':
+                        var = 'True'
+                    elif var == '0':
+                        var = 'False'
                     else:
-                        indexes[var] = [len_template]
-
-                    len_template += 1
+                        variables.add(var)
+                    template += var
                 else:
-                    return False, None, None
+                    return None, None
         elif state == State.S2:
             if s == ')':
                 template += s
@@ -116,31 +106,47 @@ def validate(expr):
                     elif op == '|':
                         inf = ' or '
                     elif op == '^':
-                        inf = ' |xor| '
+                        inf = ' |_xor| '
                     elif op == '~':
                         inf = 'not '
                     elif op == '>':
-                        inf = ' |imp| '
+                        inf = ' |_imp| '
                     elif op == '=':
-                        inf = ' |equ| '
+                        inf = ' |_equ| '
 
                     template += inf
                     state = State.S1
                     i += 1
                 else:
-                    return False, None, None
+                    return None, None
         if parens < 0:
-            return False, None, None
+            return None, None
+    if parens == 0 and state == State.S2:
+        return template, vars
+    else:
+        return None, None
 
-    if template != '':
-        elems.append(template)
-    return (parens == 0 and state == State.S2), elems, indexes
+
+def get_min_terms(_template, _variables):
+    min_terms = []
+    for m in range(2 ** len(_variables)):
+        values = [d == '1' for d in format(m, '0%db' % len(_variables))]
+        _globals = {'_xor': _xor, '_imp': _imp, '_equ': _equ}
+        if eval(_template, _globals, dict(zip(_variables, values))):
+            min_terms.append(m)
+    return min_terms
 
 
 # if __name__ == '__main__':
-#     e1 = '(aaa | b) & c'
-#     e2 = 'a | 1 & 0'
-#     e3 = '~a|1&b^(~c)'
-#     print(validate(e1))
-#     print(validate(e2))
-#     print(validate(e3))
+#     # e1 = '(a | b)'
+#     # e1 = '(aaa | b) & c'
+#     # e2 = 'a | 1b & 0'
+#     # e2 = ')a | 1b & 0'
+#     e3 = '~x|1&b^(~c)'
+#     # print(validate(e1))
+#     # print(validate(e2))
+#     # print(validate(e3))
+#     _template, variables = validate(e3)
+#     variables = sorted(variables)
+#     print(_template, variables)
+#     print(get_min_terms(_template, variables))
