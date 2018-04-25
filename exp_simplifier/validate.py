@@ -1,8 +1,7 @@
 import string
-import collections
-import re
-from enum import Enum
 from functools import partial
+
+import collections
 
 
 class Infix(object):
@@ -38,27 +37,29 @@ alphanumeric = string.ascii_letters + string.digits
 operators = '&|^~>='
 
 
-class State(Enum):
-    S1 = 1
-    S2 = 2
-
-
 def is_variable(var):
-    for s in var:
-        if s not in alphanumeric:
+    if var in ['0', '1']:
+        return True
+    elif not var[0].isalpha():
+        return False
+    for s in range(1, len(var)):
+        if var[s] not in alphanumeric:
             return False
     return True
 
 
 def consume_variable(expr, i):
-    for j in range(i + 1, i + len(expr[i:])):
-        if not expr[j].isalpha():
-            return expr[i:j], j
-    return expr[i:i + 1], i + 1
+    for j in range(i, i + len(expr[i:])):
+        if expr[j] not in alphanumeric:
+            if j == i:
+                return expr[i:i + 1], i + 1
+            else:
+                return expr[i:j], j
+    return expr[i:], i + len(expr[i:])
 
 
 def validate(expr):
-    state = State.S1
+    state = 'S1'
     parens = 0
     template = ''
     variables = set()
@@ -67,10 +68,9 @@ def validate(expr):
     while i < len(expr):
         s = expr[i]
         if s == ' ':
-            template += s
             i += 1
             continue
-        if state == State.S1:
+        if state == 'S1':
             if s == '(':
                 template += s
                 parens += 1
@@ -81,7 +81,7 @@ def validate(expr):
             else:
                 var, i = consume_variable(expr, i)
                 if is_variable(var):
-                    state = State.S2
+                    state = 'S2'
                     if var == '1':
                         var = 'True'
                     elif var == '0':
@@ -91,15 +91,14 @@ def validate(expr):
                     template += var
                 else:
                     return None, None
-        elif state == State.S2:
+        elif state == 'S2':
             if s == ')':
                 template += s
                 parens -= 1
                 i += 1
             else:
-                # operators = '&|^~>='
-                pos = operators.index(s)
-                if pos != -1:
+                try:
+                    pos = operators.index(s)
                     inf = ''
                     op = operators[pos]
                     if op == '&':
@@ -114,35 +113,34 @@ def validate(expr):
                         inf = ' | _imp | '
                     elif op == '=':
                         inf = ' | _equ | '
-
                     template += inf
-                    state = State.S1
+                    state = 'S1'
                     i += 1
-                else:
+                except ValueError:
                     return None, None
         if parens < 0:
             return None, None
-    if parens == 0 and state == State.S2:
-        return re.sub(' {2,}', ' ', template), sorted(variables)
+    if parens == 0 and state == 'S2':
+        return template, sorted(variables)
     else:
         return None, None
 
 
-def get_min_terms(_template, _variables):
+def get_min_terms(template, variables):
     min_terms = []
 
     i = 0
-    for m in range(2 ** len(_variables)):
-        bins = [int(d) for d in format(m, '0%db' % len(_variables))]
+    for m in range(2 ** len(variables)):
+        bins = [int(d) for d in format(m, '0%db' % len(variables))]
         values = [d == 1 for d in bins]
         _globals = {'_xor': _xor, '_imp': _imp, '_equ': _equ}
-        if eval(_template, _globals, dict(zip(_variables, values))):
+        if eval(template, _globals, dict(zip(variables, values))):
             min_terms.append(((m,), tuple(bins)))
             i += 1
 
     if i == 0:
         always_evaluates_to = False
-    elif i == 2 ** len(_variables):
+    elif i == 2 ** len(variables):
         always_evaluates_to = True
     else:
         always_evaluates_to = None
@@ -174,19 +172,14 @@ def create_groups(min_terms):
     groups = dict()
 
     for mt in min_terms:
-        # n = len(list(filter(lambda x: x is True, mt[1])))
         n = len(list(filter(lambda x: x == 1, mt[1])))
         groups.setdefault(n, set())
         groups[n].add(mt)
-
-    # for l in groups:
-    #     groups[l] = set(groups[l])
 
     return collections.OrderedDict(sorted(groups.items(), key=lambda i: i[0]))
 
 
 def merge_two_groups(g1, g2):
-    # g1 = [([2], [0,0,1,0]), ([8], [1,0,0,0])]
     result = set()
 
     for mt1 in g1:
@@ -204,17 +197,12 @@ def merge_groups(groups):
     result = collections.OrderedDict()
 
     keys = list(groups)
-
     for i in range(len(keys) - 1):
-        # result.append(merge_groups(groups[i], groups[i + 1]))
         res = merge_two_groups(groups[keys[i]], groups[keys[i + 1]])
         if res:
             result[keys[i]] = res
 
     return result
-
-
-# def reduce_table():
 
 
 def create_prime_implicant_table(groups, sv_min_terms):
@@ -223,7 +211,6 @@ def create_prime_implicant_table(groups, sv_min_terms):
         for min_term in group:
             merged_min_terms.append(min_term)
 
-    # pi_table = []
     pi_table = collections.OrderedDict()
 
     for sv_min_term in sv_min_terms:
@@ -236,7 +223,6 @@ def create_prime_implicant_table(groups, sv_min_terms):
                 covers_n += 1
             else:
                 covers_min_term.append(None)
-        # pi_table.append([sv_min_term_val, covers_min_term])
         pi_table.setdefault(sv_min_term_val, [])
         pi_table[sv_min_term_val] = covers_min_term
 
@@ -296,18 +282,20 @@ def make_expr(prime_implicants, variables):
                 and_joined.append('~' + variables[i])
             elif bits[i] == 1:
                 and_joined.append(variables[i])
-        # or_joined.append('(' + ' & '.join(and_joined) + ')')
         or_joined.append(' & '.join(and_joined))
 
     return ' | '.join(or_joined)
 
 
-def simplify(expr, mt, vr):
+def simplify(expr):
     if expr:
+        if len(expr) < 1:
+            return None
+
         template, variables = validate(expr)
 
         if template is None or variables is None:
-            # print('%s is not a valid logical expression' % expr)
+            print('%s is not a valid logical expression' % expr)
             return None
 
         min_terms, always_evaluates_to = get_min_terms(template, variables)
@@ -315,8 +303,7 @@ def simplify(expr, mt, vr):
         if always_evaluates_to is not None:
             return always_evaluates_to
     else:
-        min_terms = mt
-        variables = vr
+        return None
 
     groups = create_groups(min_terms)
     while True:
@@ -332,16 +319,12 @@ def simplify(expr, mt, vr):
 
 
 def main():
-    # examples = []
-    # examples.append('1 | 0')
-    # examples.append('a | b')
-    # examples.append('b | ~b')
-    print(simplify('a & ~a', None, None))
+    while True:
+        expr = input('enter logical expression to simplify: ')
+        if expr:
+            print(simplify(expr))
+        print()
 
 
 if __name__ == '__main__':
     main()
-    # mm = [2, 6, 8, 9, 10, 11, 14, 15]
-    # min_terms = sorted((((m,), tuple([int(d) for d in format(m, '0%db' % 4)])) for m in mm), key=lambda x: x[0][0])
-    # print(simplify(None, min_terms, ['W', 'X', 'Y', 'Z']))
-
