@@ -1,3 +1,18 @@
+"""
+Jakub Starzyk
+
+- operatory:
+    - koniunkcja (&),
+    - alternatywa (|),
+    - alternatywa wykluczająca (^),
+    - negacja (~),
+    - implikacja (>),
+    - równoważność (=)
+- zmienne:
+    - ciąg znaków alfanumerycznych
+    - nie powinna zaczynać się cyfrą
+"""
+
 import string
 from functools import partial
 

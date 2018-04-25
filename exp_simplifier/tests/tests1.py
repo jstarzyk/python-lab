@@ -35,7 +35,7 @@ class TestValidity(unittest.TestCase):
                                         ((5,), (1, 0, 1)),
                                         ((7,), (1, 1, 1))]))
 
-    def test_concat_groups(self):
+    def test_merge_groups(self):
         mm = [2, 6, 8, 9, 10, 11, 14, 15]
         min_terms = sorted((((m,), tuple([int(d) for d in format(m, '0%db' % 4)])) for m in mm), key=lambda x: x[0][0])
         groups = create_groups(min_terms)
