@@ -7,8 +7,8 @@ import argparse
 import json
 import sys
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtCore import Qt, QPointF, QRectF
+from PyQt5.QtGui import QColor, QPen, QPainter, QPolygonF, QImage, QPixmap
 from PyQt5.QtWidgets import QWidget, QApplication
 
 
@@ -67,18 +67,14 @@ class Point(Figure):
     def __init__(self, spec, palette, default):
         super().__init__(spec, palette, default)
         try:
-            self.x = spec['x']
-            self.y = spec['y']
-        except KeyError:
+            self.point = QPointF(spec['x'], spec['y'])
+        except (KeyError, TypeError):
             self.is_valid = False
 
     def draw_with(self, painter):
         super().draw_with(painter)
         painter.setPen(self.color)
-        try:
-            painter.drawPoint(QPointF(self.x, self.y))
-        except TypeError:
-            pass
+        painter.drawPoint(self.point)
 
 
 class Polygon(Figure):
@@ -86,63 +82,52 @@ class Polygon(Figure):
         super().__init__(spec, palette, default)
         self.antialiased = True
         try:
-            points = spec['points']
-            self.points = []
-            for p in points:
+            points = []
+            for p in spec['points']:
                 try:
-                    self.points.append(QPointF(p[0], p[1]))
-                except TypeError:
+                    points.append(QPointF(p[0], p[1]))
+                except (TypeError, IndexError):
                     pass
-        except KeyError:
+            self.polygon = QPolygonF(points)
+        except (KeyError, TypeError):
             self.is_valid = False
 
     def draw_with(self, painter):
         super().draw_with(painter)
-        try:
-            painter.drawPolygon(QPolygonF(self.points))
-        except TypeError:
-            pass
+        painter.drawPolygon(self.polygon)
 
 
 class Rectangle(Figure):
     def __init__(self, spec, palette, default):
         super().__init__(spec, palette, default)
         try:
-            self.x = spec['x']
-            self.y = spec['y']
-            self.width = spec['width']
-            self.height = spec['height']
-            self.x = self.x - self.width / 2
-            self.y = self.y - self.height / 2
-        except KeyError:
+            width = spec['width']
+            height = spec['height']
+            x = spec['x'] - width / 2
+            y = spec['y'] - height / 2
+            self.rect = QRectF(x, y, width, height)
+        except (KeyError, TypeError):
             self.is_valid = False
 
     def draw_with(self, painter):
         super().draw_with(painter)
-        try:
-            painter.drawRect(QRectF(self.x, self.y, self.width, self.height))
-        except TypeError:
-            pass
+        painter.drawRect(self.rect)
 
 
 class Square(Figure):
     def __init__(self, spec, palette, default):
         super().__init__(spec, palette, default)
         try:
-            self.x = spec['x']
-            self.y = spec['y']
-            self.size = spec['size']
-            self.x = self.x - self.size / 2
-            self.y = self.y - self.size / 2
-        except KeyError:
+            size = spec['size']
+            x = spec['x'] - size / 2
+            y = spec['y'] - size / 2
+            self.rect = QRectF(x, y, size, size)
+        except (KeyError, TypeError):
             self.is_valid = False
 
     def draw_with(self, painter):
         super().draw_with(painter)
-        try:
-            painter.drawRect(QRectF(self.x, self.y, self.size, self.size))
-        except TypeError:
-            pass
+        painter.drawRect(self.rect)
 
 
 class Circle(Figure):
@@ -150,18 +135,18 @@ class Circle(Figure):
         super().__init__(spec, palette, default)
         self.antialiased = True
         try:
-            self.x = spec['x']
-            self.y = spec['y']
-            self.radius = spec['radius']
-        except KeyError:
+            radius = spec['radius']
+            self.point = QPointF(spec['x'], spec['y'])
+            if type(radius) is int or type(radius) is float:
+                self.radius = radius
+            else:
+                raise TypeError
+        except (KeyError, TypeError):
             self.is_valid = False
 
     def draw_with(self, painter):
         super().draw_with(painter)
-        try:
-            painter.drawEllipse(QPointF(self.x, self.y), self.radius, self.radius)
-        except TypeError:
-            pass
+        painter.drawEllipse(self.point, self.radius, self.radius)
 
 
 class Drawing(QWidget):
@@ -183,7 +168,6 @@ def draw_image(figures, screen, palette):
     image = QImage(media.width, media.height, QImage.Format_RGB32)
     image.fill(media.bg_color)
     painter = QPainter(image)
-    painter.setRenderHint(QPainter.Antialiasing)
 
     for f in figures:
         try:
@@ -217,7 +201,7 @@ def parse_json(input_file):
 
 
 def setup_parser():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', help='JSON file containing image description')
     parser.add_argument('-o', '--output', help='generated image')
     return parser
