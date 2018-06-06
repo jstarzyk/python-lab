@@ -16,11 +16,19 @@ __author__ = 'Jakub Starzyk'
 __email__ = 'jstarzyk98@gmail.com'
 
 
-def get_valid_color(spec, color_type, palette, default):
+def get_valid_color(screen, color_type, palette, default):
+    """
+    Get a valid QColor object.
+    :param screen: Screen specification
+    :param color_type: color key in the Screen specification
+    :param palette: Palette specification
+    :param default: default QColor object
+    :return: valid QColor object
+    """
     try:
-        color = eval(spec[color_type], None, None)
+        color = eval(screen[color_type], None, None)
     except (NameError, SyntaxError):
-        color = spec[color_type]
+        color = screen[color_type]
     except KeyError:
         return default
 
@@ -38,6 +46,8 @@ def get_valid_color(spec, color_type, palette, default):
 
 
 class Media:
+    """Parse and represent Screen and Palette specifications."""
+
     def __init__(self, screen, palette):
         self.is_valid = True
         try:
@@ -52,12 +62,18 @@ class Media:
 
 
 class Figure:
+    """Parse and represent a figure specification."""
+
     def __init__(self, spec, palette, default):
         self.is_valid = True
         self.color = get_valid_color(spec, 'color', palette, default)
         self.antialiased = False
 
     def draw_with(self, painter):
+        """
+        Draw self using a QPainter object.
+        :param painter: QPainter object
+        """
         painter.setPen(QPen(Qt.NoPen))
         painter.setBrush(self.color)
         painter.setRenderHint(QPainter.Antialiasing, self.antialiased)
@@ -150,18 +166,33 @@ class Circle(Figure):
 
 
 class Drawing(QWidget):
+    """Show generated image in a simple window."""
+
     def __init__(self, media, pixmap):
+        """
+        Create the window.
+        :param media: Media object containing window geometry
+        :param pixmap: QPixmap object representing a generated image
+        """
         super().__init__()
         self.setFixedSize(media.width, media.height)
         self.pixmap = pixmap
 
     def paintEvent(self, event):
+        """Draw the image inside the window."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing, False)
         painter.drawPixmap(self.rect(), self.pixmap)
 
 
 def draw_image(figures, screen, palette):
+    """
+    Draw figures on an image.
+    :param figures: Figures specification
+    :param screen: Screen specification
+    :param palette: Palette specification
+    :return: parsed Media object, generated image
+    """
     media = Media(screen, palette)
     if not media.is_valid:
         return None, None
@@ -182,6 +213,11 @@ def draw_image(figures, screen, palette):
 
 
 def parse_json(input_file):
+    """
+    Parse JSON file into Figures, Screen, and Palette specifications (Python objects).
+    :param input_file: input JSON file
+    :return: parsed objects
+    """
     with open(input_file) as file:
         content = json.loads(file.read())
         try:
@@ -201,6 +237,7 @@ def parse_json(input_file):
 
 
 def setup_parser():
+    """Setup argument parser."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', help='JSON file containing image description')
     parser.add_argument('-o', '--output', help='generated image')
@@ -208,6 +245,7 @@ def setup_parser():
 
 
 def main():
+    """Generate, show, and optionally save the image."""
     parser = setup_parser()
     args = parser.parse_args()
     media, image = draw_image(*parse_json(args.input))

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A JSON-formatted image description generator
+A JSON-formatted image description generator.
 """
 
 import argparse
@@ -13,16 +13,16 @@ __author__ = 'Jakub Starzyk'
 __email__ = 'jstarzyk98@gmail.com'
 
 
-def gen_points(d, n, width, height):
+def gen_points(figures, n, width, height):
+    """Generate random points."""
     for i in range(n):
         x = random.randint(0, width - 1)
         y = random.randint(0, height - 1)
-        d['Figures'].append({'type': 'point', 'x': x, 'y': y})
-
-    return d
+        figures.append({'type': 'point', 'x': x, 'y': y})
 
 
-def gen_triangles(d, nx, width, height):
+def gen_triangles(figures, nx, width, height):
+    """Generate triangles arranged in a tiled pattern."""
     res_x = width / nx
     res_y = res_x / 2 * 3 ** 0.5
     ny = int(math.ceil(height / res_y))
@@ -34,12 +34,11 @@ def gen_triangles(d, nx, width, height):
             points.append([i * res_x + off_x, (j + 1) * res_y])
             points.append([(i + 1) * res_x + off_x, (j + 1) * res_y])
             points.append([i * res_x + res_x / 2 + off_x, j * res_y])
-            d['Figures'].append({'type': 'polygon', 'points': points})
-
-    return d
+            figures.append({'type': 'polygon', 'points': points})
 
 
-def gen_squares(d, nx, width, height):
+def gen_squares(figures, nx, width, height):
+    """Generate squares arranged in a tiled pattern."""
     res_x = width / 2 / nx
     ny = int(math.ceil(height / res_x))
 
@@ -49,12 +48,11 @@ def gen_squares(d, nx, width, height):
             off_x = (j % 2) * res_x + res_x / 2
             x = off_x + 2 * i * res_x
             y = off_y + j * res_x
-            d['Figures'].append({'type': 'square', 'x': x, 'y': y, 'size': res_x})
-
-    return d
+            figures.append({'type': 'square', 'x': x, 'y': y, 'size': res_x})
 
 
-def gen_circles(d, nx, width, height):
+def gen_circles(figures, nx, width, height):
+    """Generate circles arranged in a tiled pattern."""
     radius = width / 2 / nx
     ny = int(math.ceil(height / radius / 3 ** 0.5)) + 1
 
@@ -64,31 +62,31 @@ def gen_circles(d, nx, width, height):
             off_x = (j % 2) * radius
             x = off_x + 2 * i * radius
             y = off_y
-            d['Figures'].append({'type': 'circle', 'x': x, 'y': y, 'radius': radius})
-
-    return d
+            figures.append({'type': 'circle', 'x': x, 'y': y, 'radius': radius})
 
 
-def gen(width, height, bg_color, fg_color, type, n):
-    d = {'Screen': {'width': width, 'height': height, 'bg_color': bg_color, 'fg_color': fg_color}, 'Figures': []}
+def gen(width, height, bg_color, fg_color, type_, n):
+    """Generate file content: Screen and Figures specifications."""
+    result = {'Screen': {'width': width, 'height': height, 'bg_color': bg_color, 'fg_color': fg_color}}
+    figures = []
 
     if n < 1:
-        return d
-
-    if type == 'point':
-        d = gen_points(d, n, width, height)
-    elif type == 'triangle':
-        d = gen_triangles(d, n, width, height)
-    elif type == 'square':
-        d = gen_squares(d, n, width, height)
-    elif type == 'circle':
-        d = gen_circles(d, n, width, height)
         pass
+    elif type_ == 'point':
+        gen_points(figures, n, width, height)
+    elif type_ == 'triangle':
+        gen_triangles(figures, n, width, height)
+    elif type_ == 'square':
+        gen_squares(figures, n, width, height)
+    elif type_ == 'circle':
+        gen_circles(figures, n, width, height)
 
-    return d
+    result['Figures'] = figures
+    return result
 
 
 def setup_parser():
+    """Setup argument parser."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('output', help='generated image description')
     parser.add_argument('width', type=int, help='canvas width, in pixels')
@@ -100,10 +98,15 @@ def setup_parser():
     return parser
 
 
-if __name__ == '__main__':
+def main():
+    """Generate JSON file with image description."""
     parser = setup_parser()
     args = parser.parse_args()
     if args.output:
         with open(args.output, 'w+') as file:
-            d = gen(args.width, args.height, args.bg_color, args.fg_color, args.type, args.n)
-            file.write(json.dumps(d))
+            result = gen(args.width, args.height, args.bg_color, args.fg_color, args.type, args.n)
+            file.write(json.dumps(result))
+
+
+if __name__ == '__main__':
+    main()
