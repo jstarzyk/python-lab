@@ -105,7 +105,7 @@ def main():
     if args.output:
         with open(args.output, 'w+') as file:
             result = gen(args.width, args.height, args.bg_color, args.fg_color, args.type, args.n)
-            file.write(json.dumps(result))
+            file.write(json.dumps(result, separators=(',', ':')))
 
 
 if __name__ == '__main__':
