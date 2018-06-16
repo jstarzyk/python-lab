@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models, migrations
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -20,7 +21,10 @@ def add_groups(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+    initial = False
+
     dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('app', '0001_initial'),
     ]
 

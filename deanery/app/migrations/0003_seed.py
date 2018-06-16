@@ -1,5 +1,6 @@
 from random import choice
 
+from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.db import migrations
 
@@ -7,12 +8,15 @@ from app import models
 
 
 def add_random_marks(subject, assignments, student):
-    for _ in assignments:
+    for a in assignments:
+        # mark = models.Mark()
+        # mark.subject = subject
+        # mark.assignments.add(*assignments)
         models.Mark.objects.create(
             subject=subject,
-            assignments=assignments,
+            assignment=a,
             student=student,
-            value=choice(2.0, 3.0, 3.5, 4.0, 4.5, 5.0)
+            value=choice((20, 30, 35, 40, 45, 50))
         )
 
 
@@ -38,10 +42,17 @@ def add_person_with_user(username, password, first_name, last_name, group, subje
     )
 
     user.groups.add(group)
+    # person = models.Student()
+    # person.user = user
+    # person.subjects.add(*subjects)
+    # person.save()
     person = models.Student.objects.create(
         user=user,
-        subjects=subjects
     )
+    person.subjects.add(*subjects)
+    person.save()
+
+    # models.Student.objects.
 
     return person
 
@@ -72,8 +83,9 @@ def seed(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+    initial = False
+
     dependencies = [
-        ('app', '0001_initial'),
         ('app', '0002_make_groups'),
     ]
 

@@ -68,15 +68,15 @@ class Mark(models.Model):
         Student,
         on_delete=models.DO_NOTHING
     )
-    value = models.DecimalField(
+    value = models.PositiveSmallIntegerField(
         choices=(
-            (2.0, '2.0'),
-            (3.0, '3.0'),
-            (3.5, '3.5'),
-            (4.0, '4.0'),
-            (4.5, '4.5'),
-            (5.0, '5.0')
+            (20, '2.0'),
+            (30, '3.0'),
+            (35, '3.5'),
+            (40, '4.0'),
+            (45, '4.5'),
+            (50, '5.0')
         ),
-        decimal_places=2,
-        max_digits=2
+        # decimal_places=2,
+        # max_digits=2
     )
