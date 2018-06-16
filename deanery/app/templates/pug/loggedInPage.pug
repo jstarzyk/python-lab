@@ -1,0 +1,10 @@
+extends layout.pug
+
+block header
+  nav
+    ul
+      li
+        | Logged in as
+        | #{role}
+        span.username #{name}
+      li: a(href="/logout") Logout

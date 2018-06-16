@@ -1,0 +1,12 @@
+extends loggedInPage.pug
+
+block content
+  h2 #{name}
+  each swm in subjectWithMarksList
+    div
+      h3 #{swm.subject.name}
+      table
+        tr: each mark in swm.marks
+          th #{mark.assignment.name}
+        tr: each mark in swm.marks
+          td #{mark.value}

@@ -1,0 +1,33 @@
+{% extends "lrbase.html" %}
+
+{% block header %}
+    {{ block.super }}
+    <h2 style="width: 100px; position: absolute; left: 50%; margin-left: -50px">
+        Log In
+    </h2>
+{% endblock %}
+
+{% block content %}
+    {% if form.errors %}
+        <p>Your username and password didn't match. Please try again.</p>
+    {% endif %}
+
+    {% if next %}
+        {% if user.is_authenticated %}
+            <p>Your account doesn't have access to this page. To proceed,
+                please login with an account that has access.</p>
+        {% else %}
+            <p>Please login to see this page.</p>
+        {% endif %}
+    {% endif %}
+
+    <form id="formLogin" method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        {{ form.password.label_tag }}
+        {{ form.password }}
+        <button type="submit" value="login">Log In</button>
+        <input type="hidden" name="next" value="{{ next }}"/>
+    </form>
+{% endblock %}

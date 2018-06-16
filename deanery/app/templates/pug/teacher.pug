@@ -1,0 +1,39 @@
+extends loggedInPage.pug
+
+block content
+  h2 #{name}
+  each subject in subjects
+    div
+      h3 #{subject.name}
+      table.teacher
+        tr
+          th
+          each assignment in subject.assignments
+            th #{assignment.name}
+
+        each student in subject.students
+          tr
+            td #{student.firstName} #{student.lastName}
+            each mark in student.marks
+              td.mark
+                if mark.value
+                  span.markValue #{mark.value}
+                  form(name="update", method="post", action=`/update_mark?_method=PUT`)
+                    input(name="value", type="number", value=mark.value, step="0.5", min="2", max="5")
+                    input(name="studentId", type="hidden", value=student._id)
+                    input(name="markId", type="hidden", value=mark._id)
+                    button(type="submit", alt="Save")
+                      i.fas.fa-save
+                  form(name="delete", method="post", action=`/delete_mark?_method=DELETE`)
+                    input(name="studentId", type="hidden", value=student._id)
+                    input(name="markId", type="hidden", value=mark._id)
+                    button(type="submit", alt="Delete")
+                      i.fas.fa-trash-alt
+                else
+                   form#formAdd(name="add", method="post", action=`/add_mark`)
+                     input(name="value", type="number", value=3.0, step="0.5", min="2", max="5")
+                     input(name="studentId", type="hidden", value=student._id)
+                     input(name="subjectId", type="hidden", value=subject._id)
+                     input(name="assignmentId", type="hidden", value=mark.assignment)
+                     button(type="submit", alt="Add", align="right")
+                       i.fas.fa-save

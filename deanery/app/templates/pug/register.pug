@@ -1,0 +1,51 @@
+extends lr.pug
+
+block append header
+    h2(style="width: 100px; position: absolute; left: 50%; margin-left: -50px") Register
+
+block append head
+  script.
+    window.addEventListener('load', function() { getLogins(""); });
+
+    function getLogins(username) {
+        fetch('http://localhost:3000/all_logins', {
+            method: 'POST',
+            body: username
+        })
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                let logins = document.getElementById('logins');
+                while (logins.firstChild) {
+                    logins.removeChild(logins.firstChild);
+                }
+
+                res.forEach(function(login) {
+                    let e = document.createElement('li');
+                    e.id = "liLogin";
+                    e.appendChild(document.createTextNode(login));
+                    logins.appendChild(e);
+                });
+            });
+
+    }
+
+block content
+  div(id="reg")
+    form#formRegister(name="register", method="post", action="/add_person")
+      label(for="username") Username:
+      input(type="text", id="username", name="username", onkeyup="getLogins(username.value)")
+      label(for="password") Password:
+      input(type="password", id="password", name="password")
+      label(for="firstName") First Name:
+      input(type="text", id="firstName", name="firstName")
+      label(for="lastName") Last Name:
+      input(type="text", id="lastName", name="lastName")
+      label(for="role") Role:
+      select(id="role", name="role")
+        option(value="teacher") Teacher
+        option(value="student", selected="selected") Student
+      button#btnSubmit(type="submit") Register
+    div(id="divLogins")
+      h3(id="h3Logins") Matching logins already in use
+      ul(id="logins")
+

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block header %}
+
+<nav>
+    <ul id="lr">
+        <li>
+{#            <a class="lr" href="{% url 'register' %}">#}
+            <a class="lr" href="/register/">
+                Register
+            </a>
+        </li>
+        <li>
+{#            <a class="lr" href="{% url 'login' %}">#}
+            <a class="lr" href="/login/">
+                Log In
+            </a>
+        </li>
+    </ul>
+</nav>
+
+{% endblock %}

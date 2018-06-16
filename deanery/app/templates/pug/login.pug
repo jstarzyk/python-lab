@@ -1,0 +1,12 @@
+extends lr.pug
+
+block append header
+    h2(style="width: 100px; position: absolute; left: 50%; margin-left: -50px") Log In
+
+block content
+    form#formLogin(name="login", method="post", action="/login")
+      label(for="username") Username:
+      input(type="text", id="username", name="username")
+      label(for="password") Password:
+      input(type="password", id="password", name="password")
+      button#btnSubmit(type="submit") Log In

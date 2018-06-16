@@ -1,0 +1,19 @@
+doctype html
+
+html
+  head
+    block head
+      title Deanery: #{title}
+      link(rel='stylesheet', href='../../static/style.css')
+      // https://fontawesome.com/get-started
+      link(rel='stylesheet', href='https://use.fontawesome.com/releases/v5.0.13/css/all.css',
+           integrity='sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp',
+           crossorigin='anonymous')
+  body
+    header
+      block header
+    .content
+      block content
+    block footer
+      footer
+        block footer
