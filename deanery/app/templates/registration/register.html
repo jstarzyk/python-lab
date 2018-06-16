@@ -28,10 +28,8 @@
         {{ form.first_name }}
         {{ form.last_name.label_tag }}
         {{ form.last_name }}
-        label(for="role") Role:
-      select(id="role", name="role")
-        option(value="teacher") Teacher
-        option(value="student", selected="selected") Student
+        {{ form.role.label_tag }}
+        {{ form.role }}
         <button type="submit" value="login">Register</button>
         <input type="hidden" name="next" value="{{ next }}"/>
     </form>
