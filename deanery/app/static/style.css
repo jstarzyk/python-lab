@@ -60,7 +60,7 @@ nav ul li {
 }
 
 nav > ul > li > a {
-    color: #aaa;
+    color: #000000;
     display: block;
     line-height: 56px;
     padding: 0 24px;
@@ -141,8 +141,8 @@ form#formLogin {
     padding: 10px;
 }
 
-form#formRegister {
-    margin: 50px auto;
+form#form_register {
+    margin: 50px auto ;
     width: 450px;
     display: block;
     border: 1px #eee solid;
@@ -160,15 +160,15 @@ form#formRegister {
     /*padding: 10px;*/
 /*}*/
 
-form#formRegister label,
+form#form_register label,
 form#formLogin label {
     display: block;
     margin: 10px auto;
 }
 
-form#formRegister input[type=text],
-form#formRegister input[type=password],
-/*form#formRegister select,*/
+form#form_register input[type=text],
+form#form_register input[type=password],
+form#form_register select,
 form#formLogin input[type=text],
 form#formLogin input[type=password] {
     border: 1px solid #ccc;
@@ -180,14 +180,14 @@ form#formLogin input[type=password] {
     padding: 3px;
 }
 
-form#formRegister input[type=text]:focus,
-form#formRegister input[type=password]:focus,
+form#form_register input[type=text]:focus,
+form#form_register input[type=password]:focus,
 form#formLogin input[type=text]:focus,
 form#formLogin input[type=password]:focus {
     background-color: lightyellow;
 }
 
-form#formRegister button,
+form#form_register button,
 form#formLogin button {
     margin: 7px 0;
 }

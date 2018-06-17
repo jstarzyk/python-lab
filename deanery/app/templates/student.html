@@ -1,0 +1,21 @@
+{% extends "logged_in.html" %}
+
+{% block content %}
+  {% for pair in subject_with_marks_list %}
+    <div style="margin: 20px 10px;">
+      <h3>{{ pair.subject.name }}</h3>
+      <table>
+        <tr>
+          {% for mark in pair.marks %}
+            <th>{{ mark.assignment.name }}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          {% for mark in pair.marks %}
+            <td>{{ mark.get_value_display }}</td>
+          {% endfor %}
+        </tr>
+      </table>
+    </div>
+  {% endfor %}
+{% endblock %}

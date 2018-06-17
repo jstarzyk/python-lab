@@ -1,0 +1,62 @@
+{% extends "logged_in.html" %}
+
+{% block content %}
+  {% for subject in subjects %}
+    <div style="margin: 20px 10px;">
+      <h3>{{ subject.name }}</h3>
+      <table class="teacher">
+        <tr>
+          <th></th>
+          {% for assignment in subject.assignments %}
+            <th>{{ assignment.name }}</th>
+          {% endfor %}
+        </tr>
+        {% for student in subject.students %}
+          <tr>
+            <td>{{ student.full_name }}</td>
+            {% for fm in student.fm %}
+              <td class="mark">
+                {% if fm.mark.value %}
+                  <span class="markValue">{{ fm.mark.get_value_display }}</span>
+                  <form name="update" method="post" action="/mark/{{ fm.mark.pk }}/">
+                    {% csrf_token %}
+                    {{ fm.form.subject }}
+                    {{ fm.form.assignment }}
+                    {{ fm.form.student }}
+                    {{ fm.form.value }}
+                    <button type="submit">
+                      <i class="fa fa-save"></i>
+                    </button>
+                  </form>
+                  <form name="delete" method="post" action="/mark/{{ fm.mark.pk }}/delete/">
+                    {% csrf_token %}
+                    {{ fm.form.subject }}
+                    {{ fm.form.assignment }}
+                    {{ fm.form.student }}
+                    <div style="display: none;">
+                      {{ fm.form.value }}
+                    </div>
+                    <button type="submit">
+                      <i class="fa fa-trash-alt"></i>
+                    </button>
+                  </form>
+                {% else %}
+                  <form name="add" method="post" action="/mark/add/">
+                    {% csrf_token %}
+                    {{ fm.form.subject }}
+                    {{ fm.form.assignment }}
+                    {{ fm.form.student }}
+                    {{ fm.form.value }}
+                    <button type="submit" style="alignment: right">
+                      <i class="fa fa-save"></i>
+                    </button>
+                  </form>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  {% endfor %}
+{% endblock %}

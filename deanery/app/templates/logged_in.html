@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block header %}
+  {{ block.super }}
+  <h2 style="position: absolute; left: 0; margin-left: 10px;">
+    {{ full_name }}
+  </h2>
+  <nav>
+    <ul>
+      <li>
+        <a href="/logout/">Log Out</a>
+      </li>
+    </ul>
+  </nav>
+{% endblock %}

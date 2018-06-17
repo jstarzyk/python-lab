@@ -1,0 +1,21 @@
+{% extends "logged_in.html" %}
+
+{% block content %}
+  {% if form.errors %}
+    {% for field in form %}
+      {% for error in field.errors %}
+        <div style="text-align: center; color: crimson; width: 450px; margin: 5px auto;">
+          <b>{{ error|escape }}</b>
+        </div>
+      {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+      <div style="text-align: center; color: crimson; width: 450px; margin: 5px auto;">
+        <b>{{ error|escape }}</b>
+      </div>
+    {% endfor %}
+  {% endif %}
+  <div style="text-align: center; width: 450px; margin: 5px auto;">
+    <a href="/home/">Go back to homepage</a>
+  </div>
+{% endblock %}

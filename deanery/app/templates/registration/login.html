@@ -1,33 +1,52 @@
-{% extends "lrbase.html" %}
+{% extends "base.html" %}
 
 {% block header %}
-    {{ block.super }}
-    <h2 style="width: 100px; position: absolute; left: 50%; margin-left: -50px">
-        Log In
-    </h2>
+  {{ block.super }}
+  <h2 style="width: 100px; position: absolute; left: 50%; margin-left: -50px">
+    Log In
+  </h2>
+  <nav>
+    <ul id="lr">
+      <li>
+        <a class="lr" href="/register/">
+          Register
+        </a>
+      </li>
+    </ul>
+  </nav>
 {% endblock %}
 
 {% block content %}
-    {% if form.errors %}
-        <p>Your username and password didn't match. Please try again.</p>
-    {% endif %}
+  <form id="formLogin" method="post" action="/login/">
+    {% csrf_token %}
+    {{ form.username.label_tag }}
+    {{ form.username }}
+    {{ form.password.label_tag }}
+    {{ form.password }}
+    <button type="submit" value="login">Log In</button>
+    <input type="hidden" name="next" value="{{ next }}"/>
+  </form>
 
-    {% if next %}
-        {% if user.is_authenticated %}
-            <p>Your account doesn't have access to this page. To proceed,
-                please login with an account that has access.</p>
-        {% else %}
-            <p>Please login to see this page.</p>
-        {% endif %}
-    {% endif %}
+  {% if messages %}
+    {% for message in messages %}
+      <div style="text-align: center; color: seagreen; width: 450px; margin: 5px auto;">
+        <b>{{ message|escape }}</b>
+      </div>
+    {% endfor %}
+  {% endif %}
 
-    <form id="formLogin" method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        {{ form.username.label_tag }}
-        {{ form.username }}
-        {{ form.password.label_tag }}
-        {{ form.password }}
-        <button type="submit" value="login">Log In</button>
-        <input type="hidden" name="next" value="{{ next }}"/>
-    </form>
+  {% if form.errors %}
+    {% for field in form %}
+      {% for error in field.errors %}
+        <div style="text-align: center; color: crimson; width: 450px; margin: 5px auto;">
+          <b>{{ error|escape }}</b>
+        </div>
+      {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+      <div style="text-align: center; color: crimson; width: 450px; margin: 5px auto;">
+        <b>{{ error|escape }}</b>
+      </div>
+    {% endfor %}
+  {% endif %}
 {% endblock %}

@@ -2,17 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User, Group, Permission
 
 
-# class User(models.Model):
-#     username = models.CharField(unique=True)
-#     password: models.CharField()
-#     role = models.CharField(choices=('student', 'teacher'))
-
-# class Student(Group):
-#     name = 'student'
-#
-#
-# class Teacher(Group):
-#     name = 'teacher'
+MARKS_VALUES = (20, 30, 35, 40, 45, 50)
+MARKS_DISPLAY = ('2.0', '3.0', '3.5', '4.0', '4.5', '5.0')
 
 
 class Subject(models.Model):
@@ -20,7 +11,6 @@ class Subject(models.Model):
         unique=True,
         max_length=30
     )
-    # students = models.ManyToManyField(Student)
 
 
 class Person(models.Model):
@@ -69,14 +59,6 @@ class Mark(models.Model):
         on_delete=models.DO_NOTHING
     )
     value = models.PositiveSmallIntegerField(
-        choices=(
-            (20, '2.0'),
-            (30, '3.0'),
-            (35, '3.5'),
-            (40, '4.0'),
-            (45, '4.5'),
-            (50, '5.0')
-        ),
-        # decimal_places=2,
-        # max_digits=2
+        choices=tuple(zip(MARKS_VALUES, MARKS_DISPLAY)),
+        null=True
     )

@@ -1,21 +1,17 @@
-from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.urls import path
+
 from app import views
 
 urlpatterns = [
     path('', views.HomePageView.as_view()),
-    # path('', auth_views.LoginView.as_view()),
-    # path('about/', views.AboutPageView.as_view()),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
-    # path('register/', views.RegisterView.as_view(), name='register'),
-    path('register/', views.AddPerson.as_view()),
-    # path('register/', views.AddPerson.as_view(), name='register'),
-    # path('add_person', views.RegisterView.as_view()
-    path('password-change-done/',
-         auth_views.password_change_done,
-         {'template_name': 'app/password_change_done.html'},
-         name='password_change_done'
-         ),
-    path('accounts/', include('django.contrib.auth.urls'))
-    # path('')
+    path('login/', views.CustomLoginView.as_view()),
+    path('logout/', auth_views.LogoutView.as_view()),
+    path('register/', views.CustomRegisterView.as_view()),
+    path('home/', views.HomePageView.as_view()),
+    path('student/', views.StudentView.as_view()),
+    path('teacher/', views.TeacherView.as_view()),
+    path('mark/<int:pk>/', views.UpdateMark.as_view()),
+    path('mark/add/', views.AddMark.as_view()),
+    path('mark/<int:pk>/delete/', views.DeleteMark.as_view())
 ]
