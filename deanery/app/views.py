@@ -106,38 +106,38 @@ class TeacherView(UserPassesTestMixin, TemplateView):
             return '/student/'
 
     def get(self, request, *args, **kwargs):
-        subjects = Teacher.objects.get(user=request.user).subjects.order_by('name')
-        students = Student.objects.all()
-        marks = Mark.objects.all()
-        assignments = Assignment.objects.all()
+        teacher = Teacher.objects.get(user=request.user)
+        subjects = teacher.subjects.order_by('name')
+        subjects = subjects.prefetch_related('assignment_set')
+        subjects = subjects.prefetch_related('student_set')
+        subjects = subjects.prefetch_related('student_set__user')
+        subjects = subjects.prefetch_related('mark_set')
+
         r_subjects = []
 
-        for subject in subjects:
+        for subject in subjects.all():
             r_students = []
-            _students = students.filter(subjects__id__exact=subject.id)
-            _marks = marks.filter(subject=subject)
-            _assignments = assignments.filter(subject=subject).order_by('name')
+            marks_map = {
+                    (m.student_id, m.assignment_id): m \
+                    for m in subject.mark_set.all()
+            }
 
-            for student in _students:
+            for student in subject.student_set.all():
                 fm = []
-                __marks = _marks.filter(student=student)
 
-                for assignment in _assignments:
-                    mark = None
-                    if __marks is not None:
-                        mark = __marks.filter(assignment=assignment).first()
-                    if mark is not None:
-                        _mark = mark
-                    else:
-                        _mark = Mark(
+                for assignment in subject.assignment_set.all():
+                    key = (student.id, assignment.id)
+                    mark = marks_map.get(key)
+                    if mark is None:
+                        mark = Mark(
                             subject=subject,
                             assignment=assignment,
                             student=student,
                             value=None
                         )
                     fm.append({
-                        'form': MarkForm(instance=_mark),
-                        'mark': _mark
+                        'form': MarkForm(instance=mark),
+                        'mark': mark
                     })
 
                 r_students.append({
@@ -146,9 +146,11 @@ class TeacherView(UserPassesTestMixin, TemplateView):
                     'fm': fm
                 })
 
+            assignment_names = [a.name for a in subject.assignment_set.all()]
+
             r_subjects.append({
                 'name': subject.name,
-                'assignments': _assignments,
+                'assignments': assignment_names,
                 'students': r_students
             })
 
